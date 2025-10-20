@@ -1,4 +1,4 @@
 (executable
  (public_name LambdaCalculusCompiler)
  (name main)
- (libraries LambdaCalculusCompiler))
+ (libraries lexer))
