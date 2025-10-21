@@ -1,0 +1,15 @@
+let () =
+  let input = "\\x. x" in 
+  let lexer = new Lexer.lexer input (String.length input) in 
+  let token_ = lexer#next_token in 
+  let token = lexer#next_token in
+  match token with
+  | Lexer.LAMBDA -> print_endline "Lambda" 
+  | Lexer.RPAREN -> print_endline ")"
+  | Lexer.LPAREN -> print_endline "("
+  | Lexer.DOT-> print_endline "."
+  | Lexer.VARIABLE name -> print_endline ("Variable: " ^ name)
+  | Lexer.EOF -> print_endline "End of file"
+
+
+
