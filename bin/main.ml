@@ -10,7 +10,11 @@
 (**)
 
 let () =
-  let input = "\\x. x" in 
+  let input = "(\\x . \\y . \\z . ((x z) (y z)) \\a . (a a))" in 
   let lexer = new Frontend.Lexer.lexer input (String.length input) in 
   let parser = new Frontend.Parser.parser lexer in 
-  print_endline (Frontend.Parser.string_of_lambda parser#parse_expr)
+  let expr = parser#parse_expr in 
+  let runtime = new Runtime.runtime expr in 
+  let new_expr = runtime#apply_alpha_conversion expr in
+  print_endline (Frontend.Parser.string_of_lambda new_expr);
+  (* print_endline (Frontend.Parser.show_lambda_expression new_expr); *)

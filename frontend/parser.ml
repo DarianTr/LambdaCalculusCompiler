@@ -1,14 +1,14 @@
 type variable = 
   | Var of string
   | VariableErr
-
+[@@deriving show]
 type lambda_expression = 
   | Variable of variable 
   | Abstraction of {var: variable; expr: lambda_expression}
   | Application of {left: lambda_expression; right: lambda_expression}
   | ParseErrorExpr
   | EOF
-
+[@@deriving show]
 let string_of_variable = function
   | Var name -> name
   | VariableErr -> "<variable_error>"
@@ -28,9 +28,6 @@ let rec string_of_lambda = function
       "<parse_error>"
   | EOF ->
       "<eof>"
-
-
-
 
 
 class parser lexer =  
@@ -58,15 +55,21 @@ class parser lexer =
   method parse_expr = 
     let token = lex#next_token in 
     match token with
-      | Lexer.VARIABLE name -> Variable(Var(name)) 
+| Lexer.VARIABLE name -> (let peek = lex#peek in 
+                          match peek with 
+                            | _ -> Variable(Var(name)) 
+                            (* | Lexer.RPAREN -> Variable(Var(name)) *)
+                            (* | Lexer.EOF -> Variable(Var(name)) *)
+                            (* | _ -> let next_expr = self#parse_expr in let var = Var(name) in Application{left = Variable(var); right = next_expr} *)
+                          )
       | Lexer.LPAREN -> (let left = self#parse_expr in 
                         let right = self#parse_expr in
                         let peek = lex#next_token in
                         match peek with
-                          | Lexer.RPAREN -> let _ = lex#next_token in Application({left; right}) 
-                          | _ -> print_endline "expected )"; ParseErrorExpr
+                          | Lexer.RPAREN -> Application({left; right}) 
+  | _ -> print_string "expected ) but got "; let s = Lexer.show_token peek in print_endline s; print_endline (show_lambda_expression left); print_endline (show_lambda_expression right); ParseErrorExpr
                       )
       | Lexer.LAMBDA -> self#parse_abstraction 
       | Lexer.EOF -> EOF
-      | _ -> print_endline "Token is not a beginning of a lexpr"; ParseErrorExpr
+| _ -> print_endline "Token is not a beginning of a lexpr"; print_endline (Lexer.show_token token); ParseErrorExpr
  end

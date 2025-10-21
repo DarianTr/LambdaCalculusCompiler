@@ -6,13 +6,14 @@ type token =
   | RPAREN
   | DOT
   | EOF
-
+[@@deriving show]
 let is_variable_char c = 
   match c with
 | 'a'..'z' | 'A'..'Z'-> true
 | _ -> false
 
-
+let string_of_token t = 
+  show_token t
 
 class lexer input len =  
   object (self)
