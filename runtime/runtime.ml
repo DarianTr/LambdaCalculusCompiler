@@ -18,14 +18,16 @@ class runtime expr  =
       val mutable list_of_variables = [] |> StringSet.of_list
     method replace_var var1 name2 replacement = 
       match var1 with Frontend.Parser.Var name -> if name = name2 then Frontend.Parser.Variable(Frontend.Parser.Var(replacement)) else Frontend.Parser.Variable(var1) | _ -> expr
+
     method replace_all var replacement expr = 
       match expr with
         | Frontend.Parser.Variable name -> self#replace_var name var replacement
-        | Frontend.Parser.Abstraction { var = Frontend.Parser.Var name; expr = body} -> if name = var then self#apply_alpha_conversion expr (*WATCH OUT SHADOWING, STOP APPLYING ALPHA ON THAT BRANCH*) 
-                                                                                else let new_expr = self#replace_all var replacement body in  let n = self#apply_alpha_conversion new_expr in  Frontend.Parser.Abstraction{var = Frontend.Parser.Var(name); expr = n} 
+        | Frontend.Parser.Abstraction { var = Frontend.Parser.Var name; expr = body} -> if name = var then expr (*WATCH OUT SHADOWING, STOP APPLYING ALPHA ON THAT BRANCH*) 
+                                                                                else let new_expr = self#replace_all var replacement body in  let n = new_expr in  Frontend.Parser.Abstraction{var = Frontend.Parser.Var(name); expr = n} 
         | Frontend.Parser.Application { left = left; right = right} -> 
                               let l = self#replace_all var replacement left in let r = self#replace_all var replacement right in Frontend.Parser.Application{left = l; right = r}
         | _ -> expr 
+
     method apply_alpha_conversion cur_expr = 
        match cur_expr with
       | Frontend.Parser.Abstraction { var = Frontend.Parser.Var name; expr = body } -> 
